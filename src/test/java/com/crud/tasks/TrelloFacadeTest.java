@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,12 @@ public class TrelloFacadeTest {
     private TrelloValidator trelloValidator;
     @Mock
     private TrelloMapper trelloMapper;
+    @Mock
+    private CreatedTrelloCardDto createdTrelloCardDto;
+    @Mock
+    private TrelloCardDto trelloCardDto;
+    @Mock
+    private TrelloCard trelloCard;
 
     @Test
     void shouldFetchEmptyList() {
@@ -52,9 +59,11 @@ public class TrelloFacadeTest {
 
         List<TrelloBoardDto> trelloBoardDtos = trelloFacade.fetchTrelloBoards();
 
+        assertNotNull(trelloBoardDtos);
         assertEquals(0, trelloBoardDtos.size());
 
     }
+
     @Test
     void shouldFetchTrelloBoards() {
         List<TrelloListDto> trelloListsDto =
@@ -76,6 +85,7 @@ public class TrelloFacadeTest {
 
         List<TrelloBoardDto> trelloBoardDtos = trelloFacade.fetchTrelloBoards();
 
+        assertNotNull(trelloBoardDtos);
         assertEquals(1, trelloBoardDtos.size());
 
         trelloBoardDtos.forEach(trelloBoardDto -> {
@@ -85,8 +95,31 @@ public class TrelloFacadeTest {
             trelloBoardDto.getList().forEach(trelloListDto -> {
                 assertEquals("1", trelloListDto.getId());
                 assertEquals("test_list", trelloListDto.getName());
+                assertFalse(trelloListDto.isClosed());
             });
         });
+    }
+
+    
+
+    @Test
+    void shouldCreatedTrelloCardDto() {
+
+        //Given
+        TrelloBadgesDto trelloBudgetDto = new TrelloBadgesDto(2, new AttachmentByTypeDto(new Trello(2, 3)));
+        CreatedTrelloCardDto createdTrelloCardDto = new CreatedTrelloCardDto("1", "card", "example.com", trelloBudgetDto);
+
+        when(trelloMapper.mapToCard(trelloCardDto)).thenReturn(trelloCard);
+        when(trelloMapper.mapToCardDto(any())).thenReturn(trelloCardDto);
+        when(trelloService.createTrelloCard(trelloCardDto)).thenReturn(createdTrelloCardDto);
+
+        //When
+        CreatedTrelloCardDto createdTrelloCardDtos = trelloFacade.createdTrelloCard(trelloCardDto);
+
+        //Then
+        assertEquals("1", createdTrelloCardDto.getId());
+        assertEquals("example.com", createdTrelloCardDto.getShortUrl());
+        assertEquals(3, createdTrelloCardDto.getBadges().getAttachments().getTrello().getCard());
     }
 
 }

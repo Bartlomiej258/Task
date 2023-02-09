@@ -36,6 +36,7 @@ dependencies {
 	runtimeOnly group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
 //	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation('com.google.code.gson:gson')
 	testImplementation ('org.springframework.boot:spring-boot-starter-test') {
 		testAnnotationProcessor 'org.springframework.boot:spring-boot-starter-tomcat'
 	}
