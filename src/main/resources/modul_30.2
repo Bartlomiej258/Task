@@ -1,0 +1,30 @@
+drop procedure if exists UpdateBestsellers;
+
+DELIMITER $$
+
+create procedure UpdateBestsellers()
+BEGIN
+    DECLARE book_id INT;
+    DECLARE BESTSELLERS INT;
+    DECLARE COUNT_BESTSELLER INT;
+    DECLARE FINISHED INT DEFAULT 0;
+    DECLARE book_cursor CURSOR FOR
+SELECT book_id, COUNT(book_id)
+FROM RENTS
+GROUP BY book_id;
+
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET FINISHED = 1;
+
+OPEN book_cursor;
+
+WHILE (FINISHED = 0)
+        do
+            FETCH book_cursor INTO COUNT_BESTSELLER;
+            IF (FINISHED = 0) THEN
+SELECT COUNT(*) FROM rents WHERE BOOK_ID = COUNT_BESTSELLER INTO BESTSELLERS;
+END IF;
+END WHILE;
+CLOSE book_cursor;
+END;
+
+DELIMITER ;
